@@ -1,0 +1,4 @@
+#!/bin/bash
+
+rjsv -t -s 'src/rb' -o 'src/js' &&
+node .
