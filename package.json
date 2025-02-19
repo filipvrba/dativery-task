@@ -2,7 +2,7 @@
   "name": "dativery-task",
   "version": "0.1.0",
   "description": "",
-  "main": "src/js/main.js",
+  "main": "src/js/main.mjs",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -15,5 +15,10 @@
   "bugs": {
     "url": "https://github.com/filipvrba/dativery-task/issues"
   },
-  "homepage": "https://github.com/filipvrba/dativery-task#readme"
+  "homepage": "https://github.com/filipvrba/dativery-task#readme",
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "node-fetch": "^3.3.2",
+    "xmlbuilder2": "^3.1.1"
+  }
 }
