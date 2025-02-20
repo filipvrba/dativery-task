@@ -1,6 +1,8 @@
 import 'path',  'path'
 
+import './core/string.mjs'
 import 'Files', './core/files.mjs'
+import 'IO',    './core/io.mjs'
 import 'Net',   './task/net.mjs'
 import 'Xml',   './task/xml.mjs'
 
@@ -23,22 +25,12 @@ async def state_warehouses()
   await fetcher.state(fetch_warehouses)
 end
 
-async def fetch_products(options, ref_products)
-  await Net.fetch_data_products(options, ref_products)
-end
-
-async def state_products(ref_products)
-  fetcher = IncrementalDataFetcher.new(ref_products)
-  await fetcher.state(fetch_products)
-end
-
 async def main()
-  warehouses   = await state_warehouses()
-  ref_products = warehouses.map {|h| h['cenik@ref']}
-  products     = await state_products(ref_products)
+  warehouses = await state_warehouses()
+  # IO.p warehouses
 
-  # xml = Xml.generate(warehouses)
-  # Files.write_file({output_directory: OUTPUT_DIRECTORY, file_name: 'products.xml'}, xml)
+  xml = Xml.generate_shoptet(warehouses)
+  Files.write_file({output_directory: OUTPUT_DIRECTORY, file_name: 'shoptet_products.xml'}, xml)
 end
 
 

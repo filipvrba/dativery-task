@@ -2,49 +2,56 @@ import 'fetch', 'node-fetch'
 
 export default class Net
 
-  WAREHOUSE_CARD_API_URL = 'https://demo.flexibee.eu/c/demo/skladova-karta.json'
+  ABRA_FLEXI_API_URL = 'https://demo.flexibee.eu'
+
+  async def self.fetchJSON(url)
+    begin
+      headers = {
+        "Authorization": "Basic #{Buffer.from(process.env.ABRA_AUTH).to_s("base64")}",
+        "Accept": "application/json"
+      }
+
+      response = await fetch(url, { headers: headers })
+      return await response.json()
+    rescue => error
+      console.error("Chyba při načítání dat:", error)
+      return nil
+    end
+  end
 
   async def self.fetch_data_warehouses(options)
-    url = URL.new(WAREHOUSE_CARD_API_URL)
+    url = URL.new(ABRA_FLEXI_API_URL + "/c/demo/skladova-karta.json")
     url.search_params.append("limit", options.limit)
     url.search_params.append("start", options.start)
     url.search_params.append("detail", "custom:sklad,cenik,dostupMj,lastUpdate")
     url.search_params.append("add-row-count", "true")
 
-    response = await fetch(url.to_s, {
-      headers: {
-          "Authorization": "Basic #{Buffer.from(process.env.ABRA_AUTH).to_s("base64")}",
-          "Accept": "application/json"
-      }
-    })
+    data = await Net.fetchJSON(url)
 
-    data       = await response.json()
     warehouses = data.winstrom["skladova-karta"] 
     row_count  = data.winstrom["@rowCount"]
+
+    await Net.enrich_with_data(warehouses)
 
     [warehouses, row_count]
   end
 
-  async def self.fetch_data_products(options, ref_products)
-    puts ref_products
-    # url = URL.new(WAREHOUSE_CARD_API_URL)
-    # url.search_params.append("limit", limit)
-    # url.search_params.append("start", start)
-    # url.search_params.append("detail", "custom:sklad,cenik,dostupMj,lastUpdate")
-    # url.search_params.append("add-row-count", "true")
 
-    # response = await fetch(url.to_s, {
-    #   headers: {
-    #       "Authorization": "Basic #{Buffer.from(process.env.ABRA_AUTH).to_s("base64")}",
-    #       "Accept": "application/json"
-    #   }
-    # })
+  async def self.enrich_with_data(warehouses)
+    requests = []
 
-    # data       = await response.json()
-    # warehouses = data.winstrom["skladova-karta"] 
-    # row_count  = data.winstrom["@rowCount"]
+    warehouses.each do |warehouse|
+      if warehouse["cenik@ref"]
+        requests.push(Net.enrich_warehouse('cenik@ref', warehouse))
+      end
+    end
 
-    # [warehouses, row_count]
-    [undefined, undefined]
+    await Promise.all_settled(requests)
+  end
+
+  async def self.enrich_warehouse(key, warehouse)
+    url = ABRA_FLEXI_API_URL + warehouse[key]
+    fetch_data = await Net.fetchJSON(url)
+    warehouse[key.sub('@ref', '@data')] = fetch_data.winstrom
   end
 end

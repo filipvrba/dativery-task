@@ -1,5 +1,7 @@
 import path from "path";
+import "./core/string.mjs";
 import Files from "./core/files.mjs";
+import IO from "./core/io.mjs";
 import Net from "./task/net.mjs";
 import Xml from "./task/xml.mjs";
 import IncrementalDataFetcher from "./task/abstracts/incremental_data_fetcher.mjs";
@@ -16,20 +18,16 @@ async function stateWarehouses() {
   return await fetcher.state(fetchWarehouses)
 };
 
-async function fetchProducts(options, refProducts) {
-  return await Net.fetchDataProducts(options, refProducts)
-};
-
-async function stateProducts(refProducts) {
-  let fetcher = new IncrementalDataFetcher(refProducts);
-  return await fetcher.state(fetchProducts)
-};
-
 async function main() {
   let warehouses = await stateWarehouses();
-  let refProducts = warehouses.map(h => h["cenik@ref"]);
-  let products = await stateProducts(refProducts);
-  return products
+
+  // IO.p warehouses
+  let xml = Xml.generateShoptet(warehouses);
+
+  return Files.writeFile(
+    {outputDirectory: OUTPUT_DIRECTORY, fileName: "shoptet_products.xml"},
+    xml
+  )
 };
 
 main().catch(console.error)
