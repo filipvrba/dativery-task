@@ -25,7 +25,7 @@ export default class Xml
       cenik_data = warehouse["cenik@data"]
       next unless cenik_data
 
-      products_data = cenik_data[cenik]
+      products_data = cenik_data['cenik']
       next unless products_data
 
       product_data = products_data.first

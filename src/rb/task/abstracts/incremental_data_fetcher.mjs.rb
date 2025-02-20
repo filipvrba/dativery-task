@@ -18,7 +18,7 @@ export default class IncrementalDataFetcher
     page          = 1
 
     while @is_running
-      result, total_results = await callback({start: start, limit: @limit}, @options)
+      result, _ = await callback({start: start, limit: @limit}, @options)
 
       break if result == undefined
 

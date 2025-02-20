@@ -20,9 +20,7 @@ export default class IncrementalDataFetcher {
     let page = 1;
 
     while (this._isRunning) {
-      let result;
-
-      [result, totalResults] = await callback(
+      let [result, _] = await callback(
         {start, limit: this._limit},
         this._options
       );

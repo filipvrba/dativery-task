@@ -21,7 +21,7 @@ export default class Xml {
     for (let warehouse of warehouses) {
       let cenikData = warehouse["cenik@data"];
       if (!cenikData) continue;
-      let productsData = cenikData[cenik];
+      let productsData = cenikData.cenik;
       if (!productsData) continue;
       let productData = productsData[0];
       if (!productData) continue;
